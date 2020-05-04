@@ -289,134 +289,207 @@ void dijkstra(SURADNICE** array, PRIORITY* first, char** mapa, int dlzka) {
 	}
 }
 
-void search(int dlzka, char** mapa) {
-	int temp = 0, dx = -2, dy = -2, valid = -1, p = 0 , counter = 0;
+int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
+	
+	int t1 = pow(10, 6);
+	if (n >= 1 && n <= 100 && m >= 1 && m <= 100 && t >= 0 && t <= t1) {
+		int temp = 0, dx = -2, dy = -2, valid = -1, p = 0, counter = 0;
+		int dlzka = n;
+		PRIORITY* first = NULL;
+		SURADNICE** array = (SURADNICE*)malloc(dlzka * sizeof(SURADNICE));
+		for (int i = 0; i < dlzka; i++)
+			array[i] = (SURADNICE*)malloc(20 * sizeof(SURADNICE));
 
-	PRIORITY* first = NULL;
-	SURADNICE** array = (SURADNICE*)malloc(dlzka * sizeof(SURADNICE));
-	for (int i = 0; i < dlzka; i++)
-		array[i] = (SURADNICE*)malloc(20 * sizeof(SURADNICE));
+		arrayInit(array, dlzka);
 
-	arrayInit(array, dlzka);
+		valid = validate(mapa, dlzka);
+		printf("validate: %d\n", valid);
 
-	valid = validate(mapa, dlzka);
-	printf("validate: %d\n", valid);
-
-	if (valid == -1)
-		return NULL;
-	else {
-		int* xova = (int*)malloc(valid * sizeof(int) + 1);
-		int* yova = (int*)malloc(valid * sizeof(int) + 1);
-		pozicieprincezien(xova, yova, dlzka, mapa); //spravi array so suradnicami princezien a draka ulozi na poziciu 0
-
-		char pismeno = vzdialenost(mapa, 0, 0);
-		if (pismeno == 'N') {
-			printf("neplatna mapa");
+		if (valid == -1)
 			return NULL;
-		}
 		else {
-			if (pismeno == 'D') {
-				dx = 0;
-				dy = 0;
-			}
-			if (pismeno == 'H')
-				array[0][0].distance = 2;
-			else
-				array[0][0].distance = 1;
+			int* xova = (int*)malloc(valid * sizeof(int) + 1);
+			int* yova = (int*)malloc(valid * sizeof(int) + 1);
+			pozicieprincezien(xova, yova, dlzka, mapa); //spravi array so suradnicami princezien a draka ulozi na poziciu 0
 
-			insertpriority(&array[0][0], &first);
-			dijkstra(array, first, mapa, dlzka);
-
-			int* finalarray = (int*)malloc(sizeof(int) * 1000);
-			for (int i = 0; i < 1000; i++)
-				finalarray[i] = -1;
-
-			if (array[xova[0]][yova[0]].distance != max) { // ak sa da sostat ku drakovi
-				for (int i = 1; i < valid + 1; i++) {// ak sa neda dostat ku princeznej
-					if (array[xova[i]][yova[i]].distance == max) {
-						printf("neda sa dostat ku princeznej\n");
-						return NULL;
-					}
-				}
-				suradnicedraka(array, xova[0], yova[0], &counter, finalarray);
-				//printf("%d %d", xova[1], yova[1]);
-			}
-			else { //neda sa dostat ku drakovi
-				printf("neda sa dostat ku drakovi\n");
+			char pismeno = vzdialenost(mapa, 0, 0);
+			if (pismeno == 'N') {
+				printf("neplatna mapa");
 				return NULL;
 			}
+			else {
+				if (pismeno == 'D') {
+					dx = 0;
+					dy = 0;
+				}
+				if (pismeno == 'H')
+					array[0][0].distance = 2;
+				else
+					array[0][0].distance = 1;
 
-			//hladanie cesty k princeznam
-
-			int** matica = (int*)malloc(valid * sizeof(int) + 1);
-			for (int i = 0; i < valid + 1; i++) {
-				matica[i] = (int*)malloc(sizeof(int) + 1);
-			}
-
-			for (int i = 0; i < valid + 1; i++) {
-				first = NULL;
-				arrayInit(array, dlzka);
-				array[xova[i]][yova[i]].distance = 0;
-				insertpriority(&array[xova[i]][yova[i]], &first);
+				insertpriority(&array[0][0], &first);
 				dijkstra(array, first, mapa, dlzka);
 
-				for (int x = 0; x < valid + 1; x++) {
-					matica[i][x] = array[xova[x]][yova[x]].distance;
+				int* finalarray = (int*)malloc(sizeof(int) * 1000);
+				for (int i = 0; i < 1000; i++)
+					finalarray[i] = -1;
+
+				if (array[xova[0]][yova[0]].distance != max) { // ak sa da sostat ku drakovi
+					for (int i = 1; i < valid + 1; i++) {// ak sa neda dostat ku princeznej
+						if (array[xova[i]][yova[i]].distance == max) {
+							printf("neda sa dostat ku princeznej\n");
+							return NULL;
+						}
+					}
+					suradnicedraka(array, xova[0], yova[0], &counter, finalarray);
+
+					int x = 0 , tt = 0;
+					while(finalarray[2 * x + 1] != -1){//vypocita cas cesty ku drakovi
+						if (vzdialenost(mapa, finalarray[2 * x], finalarray[2 * x + 1]) == 'H')
+							tt += 2;
+						else
+							tt++;
+						x++;
+					}
+					//printf("tt: %d\n", tt);
+					if (tt > t) {//zisti ci drak stihol zjest princezne
+						printf("Malo casu drak zjedol princezne");
+						return NULL;
+					}
+					//printf("%d %d", xova[1], yova[1]);
 				}
-			}
+				else { //neda sa dostat ku drakovi
+					printf("neda sa dostat ku drakovi\n");
+					return NULL;
+				}
 
-			//printf("\n  D  1  2  3\n");
-			//for (int i = 0; i < valid + 1; i++) { //vypis matice
-			//	if (i == 0)
-			//		printf("D ");
-			//	else
-			//		printf("%d ", i);
-			//	for (int x = 0; x < valid + 1; x++) {
-			//		printf("%d  ", matica[i][x]);
-			//	}
-			//	printf("\n");
-			//}
+				//hladanie cesty k princeznam
+				int** matica = (int*)malloc(valid * sizeof(int) + 1);
+				for (int i = 0; i < valid + 1; i++) {
+					matica[i] = (int*)malloc(sizeof(int) + 1);
+				}
 
-			//riesenie princezien a ich ciest
-			int* pomocna = (int*)malloc(sizeof(int) * (valid + 1));
-			int* najkratsi = (int*)malloc(sizeof(int) * (valid + 1));
-			int shortest = max, temp1 = 0;
+				for (int i = 0; i < valid + 1; i++) {
+					first = NULL;
+					arrayInit(array, dlzka);
+					array[xova[i]][yova[i]].distance = 0;
+					insertpriority(&array[xova[i]][yova[i]], &first);
+					dijkstra(array, first, mapa, dlzka);
 
-			int* random = (int*)malloc(sizeof(int) * (valid + 1));
+					for (int x = 0; x < valid + 1; x++) {
+						matica[i][x] = array[xova[x]][yova[x]].distance;
+					}
+				}
 
-			for (int i = 0; i < valid + 1; i++) {
-				random[i] = 0;
-			}
+				//printf("\n  D  1  2  3\n"); //vypis matice
+				//for (int i = 0; i < valid + 1; i++) {
+				//	if (i == 0)
+				//		printf("D ");
+				//	else
+				//		printf("%d ", i);
+				//	for (int x = 0; x < valid + 1; x++) {
+				//		printf("%d  ", matica[i][x]);
+				//	}
+				//	printf("\n");
+				//}
 
-			switch (valid) {
-			case 5:
-				for (int i = 1; i < valid + 1; i++) {
-					if (random[i] == 1)
-						continue;
-					random[i] = 1;
-					for (int x = 1; x < valid + 1; x++) {
-						if (random[x] == 1)
+				//riesenie princezien a ich ciest
+				int* pomocna = (int*)malloc(sizeof(int) * (valid + 1));
+				int* najkratsi = (int*)malloc(sizeof(int) * (valid + 1));
+				int shortest = max, temp1 = 0;
+
+				int* random = (int*)malloc(sizeof(int) * (valid + 1));
+
+				for (int i = 0; i < valid + 1; i++) {
+					random[i] = 0;
+				}
+
+				switch (valid) {
+				case 5:
+					for (int i = 1; i < valid + 1; i++) {
+						if (random[i] == 1)
 							continue;
-						random[x] = 1;
-						for (int y = 1; y < valid + 1; y++) {
-							if (random[y] == 1)
+						random[i] = 1;
+						for (int x = 1; x < valid + 1; x++) {
+							if (random[x] == 1)
 								continue;
-							random[y] = 1;
-							for (int a = 1; a < valid + 1; a++) {
-								if (random[a] == 1)
+							random[x] = 1;
+							for (int y = 1; y < valid + 1; y++) {
+								if (random[y] == 1)
 									continue;
-								random[a] = 1;
-								for (int b = 1; b < valid + 1; b++) {
-									if (random[b] == 1)
+								random[y] = 1;
+								for (int a = 1; a < valid + 1; a++) {
+									if (random[a] == 1)
 										continue;
-									random[b] = 1;
+									random[a] = 1;
+									for (int b = 1; b < valid + 1; b++) {
+										if (random[b] == 1)
+											continue;
+										random[b] = 1;
+
+										pomocna[0] = 0;
+										pomocna[1] = i;
+										pomocna[2] = x;
+										pomocna[3] = y;
+										pomocna[4] = a;
+										pomocna[5] = b;
+
+										for (int z = 0; z < valid; z++) {
+											first = NULL;
+											arrayInit(array, dlzka);
+											array[xova[pomocna[z]]][yova[pomocna[z]]].distance = 0;
+											insertpriority(&array[xova[pomocna[z]]][yova[pomocna[z]]], &first);
+											dijkstra(array, first, mapa, dlzka);
+											temp1 += array[xova[pomocna[z + 1]]][yova[pomocna[z + 1]]].distance;
+											//printf("temp : %d\n", temp1);
+										}
+										if (temp1 < shortest) {
+											najkratsi[0] = 0;
+											najkratsi[1] = i;
+											najkratsi[2] = x;
+											najkratsi[3] = y;
+											najkratsi[4] = a;
+											najkratsi[5] = b;
+
+											shortest = temp1;
+										}
+										temp1 = 0;
+
+										//printf("0 %d %d %d %d %d\n", i, x, y, a, b);
+										random[b] = 0;
+									}
+									random[a] = 0;
+								}
+								random[y] = 0;
+							}
+							random[x] = 0;
+						}
+						random[i] = 0;
+					}
+					break;
+				case 4:
+					for (int i = 1; i < valid + 1; i++) {
+						if (random[i] == 1)
+							continue;
+						random[i] = 1;
+						for (int x = 1; x < valid + 1; x++) {
+							if (random[x] == 1)
+								continue;
+							random[x] = 1;
+							for (int y = 1; y < valid + 1; y++) {
+								if (random[y] == 1)
+									continue;
+								random[y] = 1;
+								for (int a = 1; a < valid + 1; a++) {
+									if (random[a] == 1)
+										continue;
+									random[a] = 1;
 
 									pomocna[0] = 0;
 									pomocna[1] = i;
 									pomocna[2] = x;
 									pomocna[3] = y;
 									pomocna[4] = a;
-									pomocna[5] = b;
 
 									for (int z = 0; z < valid; z++) {
 										first = NULL;
@@ -433,47 +506,39 @@ void search(int dlzka, char** mapa) {
 										najkratsi[2] = x;
 										najkratsi[3] = y;
 										najkratsi[4] = a;
-										najkratsi[5] = b;
 
 										shortest = temp1;
 									}
 									temp1 = 0;
 
-									//printf("0 %d %d %d %d %d\n", i, x, y, a, b);
-									random[b] = 0;
+									//printf("0 %d %d %d %d \n", i, x, y, a);
+									random[a] = 0;
 								}
-								random[a] = 0;
+								random[y] = 0;
 							}
-							random[y] = 0;
+							random[x] = 0;
 						}
-						random[x] = 0;
+						random[i] = 0;
 					}
-					random[i] = 0;
-				}
-				break;
-			case 4:
-				for (int i = 1; i < valid + 1; i++) {
-					if (random[i] == 1)
-						continue;
-					random[i] = 1;
-					for (int x = 1; x < valid + 1; x++) {
-						if (random[x] == 1)
+					break;
+				case 3:
+					for (int i = 1; i < valid + 1; i++) {
+						if (random[i] == 1)
 							continue;
-						random[x] = 1;
-						for (int y = 1; y < valid + 1; y++) {
-							if (random[y] == 1)
+						random[i] = 1;
+						for (int x = 1; x < valid + 1; x++) {
+							if (random[x] == 1)
 								continue;
-							random[y] = 1;
-							for (int a = 1; a < valid + 1; a++) {
-								if (random[a] == 1)
+							random[x] = 1;
+							for (int y = 1; y < valid + 1; y++) {
+								if (random[y] == 1)
 									continue;
-								random[a] = 1;
+								random[y] = 1;
 
 								pomocna[0] = 0;
 								pomocna[1] = i;
 								pomocna[2] = x;
 								pomocna[3] = y;
-								pomocna[4] = a;
 
 								for (int z = 0; z < valid; z++) {
 									first = NULL;
@@ -489,40 +554,32 @@ void search(int dlzka, char** mapa) {
 									najkratsi[1] = i;
 									najkratsi[2] = x;
 									najkratsi[3] = y;
-									najkratsi[4] = a;
 
 									shortest = temp1;
 								}
 								temp1 = 0;
 
-								//printf("0 %d %d %d %d \n", i, x, y, a);
-								random[a] = 0;
+								//printf("0 %d %d %d\n", i, x, y);
+								random[y] = 0;
 							}
-							random[y] = 0;
+							random[x] = 0;
 						}
-						random[x] = 0;
+						random[i] = 0;
 					}
-					random[i] = 0;
-				}
-				break;
-			case 3:
-				for (int i = 1; i < valid + 1; i++) {
-					if (random[i] == 1)
-						continue;
-					random[i] = 1;
-					for (int x = 1; x < valid + 1; x++) {
-						if (random[x] == 1)
+					break;
+				case 2:
+					for (int i = 1; i < valid + 1; i++) {
+						if (random[i] == 1)
 							continue;
-						random[x] = 1;
-						for (int y = 1; y < valid + 1; y++) {
-							if (random[y] == 1)
+						random[i] = 1;
+						for (int x = 1; x < valid + 1; x++) {
+							if (random[x] == 1)
 								continue;
-							random[y] = 1;
+							random[x] = 1;
 
 							pomocna[0] = 0;
 							pomocna[1] = i;
 							pomocna[2] = x;
-							pomocna[3] = y;
 
 							for (int z = 0; z < valid; z++) {
 								first = NULL;
@@ -537,102 +594,56 @@ void search(int dlzka, char** mapa) {
 								najkratsi[0] = 0;
 								najkratsi[1] = i;
 								najkratsi[2] = x;
-								najkratsi[3] = y;
 
 								shortest = temp1;
 							}
 							temp1 = 0;
 
-							//printf("0 %d %d %d\n", i, x, y);
-							random[y] = 0;
+							//printf("0 %d %d\n", i, x);
+							random[x] = 0;
 						}
-						random[x] = 0;
+						random[i] = 0;
 					}
-					random[i] = 0;
+					break;
+				case 1:
+					najkratsi[0] = 0;
+					najkratsi[1] = 1;
+					//printf("0 1");
+					break;
 				}
-				break;
-			case 2:
-				for (int i = 1; i < valid + 1; i++) {
-					if (random[i] == 1)
-						continue;
-					random[i] = 1;
-					for (int x = 1; x < valid + 1; x++) {
-						if (random[x] == 1)
-							continue;
-						random[x] = 1;
 
-						pomocna[0] = 0;
-						pomocna[1] = i;
-						pomocna[2] = x;
 
-						for (int z = 0; z < valid; z++) {
-							first = NULL;
-							arrayInit(array, dlzka);
-							array[xova[pomocna[z]]][yova[pomocna[z]]].distance = 0;
-							insertpriority(&array[xova[pomocna[z]]][yova[pomocna[z]]], &first);
-							dijkstra(array, first, mapa, dlzka);
-							temp1 += array[xova[pomocna[z + 1]]][yova[pomocna[z + 1]]].distance;
-							//printf("temp : %d\n", temp1);
-						}
-						if (temp1 < shortest) {
-							najkratsi[0] = 0;
-							najkratsi[1] = i;
-							najkratsi[2] = x;
-
-							shortest = temp1;
-						}
-						temp1 = 0;
-
-						//printf("0 %d %d\n", i, x);
-						random[x] = 0;
-					}
-					random[i] = 0;
+				/*printf("najkratsia %d\n", shortest);
+				for (int i = 0; i < valid; i++) {
+					printf("%d ", najkratsi[i]);
 				}
-				break;
-			case 1:
-				najkratsi[0] = 0;
-				najkratsi[1] = 1;
-				//printf("0 1");
-				break;
+				printf("\n\n");*/
+
+				for (int z = 0; z < valid; z++) { //vypis cesty pre princezne
+					first = NULL;
+					arrayInit(array, dlzka);
+					array[xova[najkratsi[z]]][yova[najkratsi[z]]].distance = 0;
+					insertpriority(&array[xova[najkratsi[z]]][yova[najkratsi[z]]], &first);
+					dijkstra(array, first, mapa, dlzka);
+					suradnicedraka(array, xova[najkratsi[z + 1]], yova[najkratsi[z + 1]], &counter, finalarray);
+					//printf("temp : %d\n", temp1);
+				}
+
+				*dlzka_cesty = counter + 1;
+				return finalarray;
 			}
-
-
-			/*printf("najkratsia %d\n", shortest);
-			for (int i = 0; i < valid; i++) {
-				printf("%d ", najkratsi[i]);
-			}
-			printf("\n\n");*/
-
-			for (int z = 0; z < valid; z++) { //vypis cesty pre princezne
-				first = NULL;
-				arrayInit(array, dlzka);
-				array[xova[najkratsi[z]]][yova[najkratsi[z]]].distance = 0;
-				insertpriority(&array[xova[najkratsi[z]]][yova[najkratsi[z]]], &first);
-				dijkstra(array, first, mapa, dlzka);
-				suradnicedraka(array, xova[najkratsi[z + 1]], yova[najkratsi[z + 1]], &counter, finalarray);
-				//printf("temp : %d\n", temp1);
-			}
-
-			for (int i = 0; i < counter + 1; i++)
-				printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 		}
 	}
-}
-
-int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
-	int t1 = pow(10, 6);
-
-	if (n >= 1 && n <= 100 && m >= 1 && m <= 100 && t >= 0 && t <= t1)
-		search(n, mapa);
 	else
 		return NULL;
 }
 
 int main() {
-	int dlzka = 10, cas = 10, dlzka_cesty;
+	int dlzka = 10, cas = 20, dlzka_cesty;
+	int* finalarray;
 
 	char** mapa = (char**)malloc(dlzka * sizeof(char*));
-	mapa[0] = "CCHCNHCCHN";
+	mapa[0] = "CPHCNHCCHN";
 	mapa[1] = "NNCCCHHCCC";
 	mapa[2] = "DNCCNNHHHP";
 	mapa[3] = "HNCNNNNNNN";
@@ -641,7 +652,7 @@ int main() {
 	mapa[6] = "NNNNNHCCCC";
 	mapa[7] = "CCCCCCCCCC";
 	mapa[8] = "CCCNNHHHHH";
-	mapa[9] = "HHHPCCCCCC";
+	mapa[9] = "HHHPCCCPCC";
 
 	for (int y = 0; y < dlzka; y++) {
 		for (int x = 0; x < dlzka; x++) {
@@ -649,8 +660,11 @@ int main() {
 		}
 		printf("\n");
 	}
+	
+	finalarray = zachran_princezne(mapa, dlzka, dlzka, cas, &dlzka_cesty);
 
-	zachran_princezne(mapa, dlzka, dlzka, cas, &dlzka_cesty);
+	for (int i = 0; i < dlzka_cesty; i++)
+		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 
 	/*int* minHeap = (int*)malloc(n * n * sizeof(int) + 1);
 

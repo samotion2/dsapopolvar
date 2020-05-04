@@ -7,14 +7,10 @@ C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(221,41): warning C4047: '=': '
 C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(238,41): warning C4047: '=': 'char' differs in levels of indirection from 'char *'
 C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(255,41): warning C4047: '=': 'char' differs in levels of indirection from 'char *'
 C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(272,41): warning C4047: '=': 'char' differs in levels of indirection from 'char *'
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(306,14): warning C4098: 'search': 'void' function returning a value
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(315,15): warning C4098: 'search': 'void' function returning a value
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(338,18): warning C4098: 'search': 'void' function returning a value
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(346,16): warning C4098: 'search': 'void' function returning a value
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(296,1): warning C4047: 'initializing': 'SURADNICE **' differs in levels of indirection from 'SURADNICE *'
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(312,1): warning C4047: 'initializing': 'char' differs in levels of indirection from 'char *'
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(351,1): warning C4047: 'initializing': 'int **' differs in levels of indirection from 'int *'
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(623,1): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(648,11): warning C4477: 'printf' : format string '%c' requires an argument of type 'int', but variadic argument 1 has type 'char *'
-C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(629): warning C4715: 'zachran_princezne': not all control paths return a value
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(348,77): warning C4047: '==': 'char *' differs in levels of indirection from 'int'
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(294,1): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(299,1): warning C4047: 'initializing': 'SURADNICE **' differs in levels of indirection from 'SURADNICE *'
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(315,1): warning C4047: 'initializing': 'char' differs in levels of indirection from 'char *'
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(367,1): warning C4047: 'initializing': 'int **' differs in levels of indirection from 'int *'
+C:\Users\PC\Desktop\dsa3zadanie\Project1\Source.c(659,11): warning C4477: 'printf' : format string '%c' requires an argument of type 'int', but variadic argument 1 has type 'char *'
   Project1.vcxproj -> C:\Users\PC\Desktop\dsa3zadanie\Debug\Project1.exe
