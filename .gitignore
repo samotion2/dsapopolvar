@@ -1,3 +1,6 @@
 /.vs
+.sln
 /Debug
-/Project1
+.users
+.filters
+.vcxproj
