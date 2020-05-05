@@ -1,3 +1,5 @@
+//Samuel Kaceriak
+//DSA 3.zadanie
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -30,25 +32,11 @@ void arrayInit(SURADNICE** array, int dlzkax, int dlzkay) { //inicializuje mapu 
 	}
 }
 
-void vypis(char** mapa, int dlzka) {
-	for (int x = 0; x < dlzka; x++) {
-		for (int i = 0; i < dlzka; i++) {
-			if (mapa[x][i] == 'C')
-				printf("1");
-			else if (mapa[x][i] == 'H')
-				printf("2");
-			else
-				printf("%c", mapa[x][i]);
-		}
-		printf("\n");
-	}
-}
-
 char* vzdialenost(char** mapa, int x, int y) { //vrati pismeno na danych suradniciach
 	return  mapa[y][x];
 }
 
-void insertpriority(SURADNICE* policko, PRIORITY** first) {
+void insertpriority(SURADNICE* policko, PRIORITY** first) { //vlozi hodnotu do prioritneho radu
 	PRIORITY* new = (struct PRIORITY*) malloc(sizeof(PRIORITY)), * dalsi = *first, * pomocna = NULL, * prev = NULL;
 
 	new->distance = policko->distance;
@@ -58,7 +46,7 @@ void insertpriority(SURADNICE* policko, PRIORITY** first) {
 		prev = dalsi;
 		dalsi = dalsi->next;
 	}
-	if (*first == NULL) {
+	if (*first == NULL) { // ak je prvy null vlozi ho na zaciatok
 		(*first) = new;
 		(*first)->next = NULL;
 	}
@@ -74,27 +62,21 @@ void insertpriority(SURADNICE* policko, PRIORITY** first) {
 	}
 }
 
-void deletepriority(PRIORITY** first) {
-	PRIORITY* delete;
+void deletepriority(PRIORITY** first) {//vymaze prvy hodnotu z prioritneho radu
 	if ((*first)->next == NULL) {
 		*first = NULL;
 	}
 	else {
-		delete = *first;
 		*first = (*first)->next;
-		//free(delete);
 	}
 }
 
-void suradnicedraka(SURADNICE** array, int dx, int dy, int* counter1, int* finalarray) {
+void suradnicedraka(SURADNICE** array, int dx, int dy, int* counter1, int* finalarray) {//do finalarray ulozi suradnice
 	SURADNICE* minuly = &array[dx][dy];
 	SURADNICE* minuly1 = &array[dx][dy];
 	int counter = 0, index;
 
-	//printf("drak je na[%d, %d] a najkratsia vzdialenost %d\n", dx, dy, array[dx][dy].distance);
-
-	while (minuly != NULL) {
-		//printf("[%d,%d]\n", minuly->x, minuly->y);
+	while (minuly != NULL) { //spocita kolko krokv je na zaciatok
 		minuly = minuly->prev;
 		counter++;
 	}
@@ -104,18 +86,17 @@ void suradnicedraka(SURADNICE** array, int dx, int dy, int* counter1, int* final
 
 	index = counter;
 	counter = 0;
-	while (minuly1 != NULL) {
+	while (minuly1 != NULL) { //odzadu priraduje suradnice do arrayu
 		tempx[index - counter - 1] = minuly1->x;
 		tempy[index - counter - 1] = minuly1->y;
 		minuly1 = minuly1->prev;
 		counter++;
 	}
 
-	for (int i = 0; i < index; i++) {
+	for (int i = 0; i < index; i++) {//priradi suradnice do finalarray
 		finalarray[2 * (*counter1)] = tempx[i];
 		finalarray[2 * (*counter1) + 1] = tempy[i];
 		*counter1 += 1;
-		//printf("%d %d\n", tempx[i], tempy[i]);
 	}
 	(*counter1)--;//aby sa neopakovali koncovy a zaciatocny pri zapise do arrayu
 
@@ -164,27 +145,27 @@ void pozicieprincezien(int* xova, int* yova, int dlzkax, int dlzkay, char** mapa
 	}*/
 }
 
-void dijkstra(SURADNICE** array, PRIORITY* first, char** mapa, int dlzkax, int dlzkay) {
+void dijkstra(SURADNICE** array, PRIORITY* first, char** mapa, int dlzkax, int dlzkay) { //dijkstrov algoritmus
 	char pismeno;
 	int temp = 0;
 
-	while (first != NULL) {
-		int x = first->sur->x;
+	while (first != NULL) {//dokym nie je prioritny rad prazdny
+		int x = first->sur->x;//priradi suradnice akturalneho policka
 		int y = first->sur->y;
 
 		if (x - 1 >= 0 && array[x - 1][y].visited == 0) {//vlavo
-			pismeno = vzdialenost(mapa, x - 1, y);
-			if (pismeno == 'N') {
+			pismeno = vzdialenost(mapa, x - 1, y);//zisti ake pismeno sa tam nachadza
+			if (pismeno == 'N') {//ak je to N nastavuje ho na visited a ide dalej
 				array[x - 1][y].visited = 1;
 			}
-			else {
+			else { //inak pokracuje
 				if (pismeno == 'H')
 					temp = 2;
 				else temp = 1;
-				if (array[x][y].distance + temp < array[x - 1][y].distance) {
+				if (array[x][y].distance + temp < array[x - 1][y].distance) {//ak je aktualna vzdialenost mensia ako najdena tak priradi mensiu
 					array[x - 1][y].distance = array[x][y].distance + temp;
-					insertpriority(&array[x - 1][y], &first);
-					array[x - 1][y].prev = &array[x][y];
+					insertpriority(&array[x - 1][y], &first);//do prioritneho radu vlozi dane policko
+					array[x - 1][y].prev = &array[x][y];//najstavi predchadzajuci
 				}
 			}
 		}
@@ -239,35 +220,33 @@ void dijkstra(SURADNICE** array, PRIORITY* first, char** mapa, int dlzkax, int d
 				}
 			}
 		}
-		array[x][y].visited = 1;
-		deletepriority(&first);
+		array[x][y].visited = 1;//aktualne policko nastavi na visited
+		deletepriority(&first);//vymaze prvy prvok z priority
 	}
 }
 
 int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
-	
 	int t1 = pow(10, 6);
-	if (n >= 1 && n <= 100 && m >= 1 && m <= 100 && t >= 0 && t <= t1) {
+	if (n >= 1 && n <= 100 && m >= 1 && m <= 100 && t >= 0 && t <= t1) {//skontroluje vstupne parametre
 		int temp = 0, dx = -2, dy = -2, valid = -1, p = 0, counter = 0;
-		//int dlzka = n;
 		PRIORITY* first = NULL;
 		SURADNICE** array = (SURADNICE*)malloc(m * sizeof(SURADNICE));
 		for (int i = 0; i < n; i++)
 			array[i] = (SURADNICE*)malloc(n * sizeof(SURADNICE));
 
-		arrayInit(array, n, m);
+		arrayInit(array, n, m);//inicializuje mapu nacisto(resetuje do pociatocneho stavu)
 
-		valid = validate(mapa, n, m);
+		valid = validate(mapa, n, m);//skontroluje ci je spravny pocet princezien a draka, valid je zarovej pocet princezien
 		//printf("validate: %d\n", valid);
 
-		if (valid == -1)
+		if (valid == -1)//ak nie je spravny pocet konci
 			return NULL;
 		else {
 			int* xova = (int*)malloc(valid * sizeof(int) + 1);
 			int* yova = (int*)malloc(valid * sizeof(int) + 1);
 			pozicieprincezien(xova, yova, n, m, mapa); //spravi array so suradnicami princezien a draka ulozi na poziciu 0
 
-			char pismeno = vzdialenost(mapa, 0, 0);
+			char pismeno = vzdialenost(mapa, 0, 0); //zisti co je prve policko a podla toho mu priradi distance alebo skonci ked je N
 			if (pismeno == 'N') {
 				//printf("neplatna mapa");
 				return NULL;
@@ -282,11 +261,11 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 				else
 					array[0][0].distance = 1;
 
-				insertpriority(&array[0][0], &first);
+				insertpriority(&array[0][0], &first);//vlozi prve policko do priority
 				dijkstra(array, first, mapa, n, m);
 
-				int* finalarray = (int*)malloc(sizeof(int) * 1000);
-				for (int i = 0; i < 1000; i++)
+				int* finalarray = (int*)malloc(sizeof(int) * 10000);//docasny array na zapis suradnic
+				for (int i = 0; i < 10000; i++)
 					finalarray[i] = -1;
 
 				if (array[xova[0]][yova[0]].distance != max) { // ak sa da sostat ku drakovi
@@ -296,7 +275,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 							return NULL;
 						}
 					}
-					suradnicedraka(array, xova[0], yova[0], &counter, finalarray);
+					suradnicedraka(array, xova[0], yova[0], &counter, finalarray);//zapise cestu ku drakovi do arrayu
 
 					int x = 0 , tt = 0;
 					while(finalarray[2 * x + 1] != -1){//vypocita cas cesty ku drakovi
@@ -306,7 +285,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 							tt++;
 						x++;
 					}
-					//printf("tt: %d\n", tt);
+					
 					if (tt > t) {//zisti ci drak stihol zjest princezne
 						//printf("Malo casu drak zjedol princezne");
 						return NULL;
@@ -319,12 +298,12 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 				}
 
 				//hladanie cesty k princeznam
-				int** matica = (int*)malloc(valid * sizeof(int) + 1);
+				int** matica = (int*)malloc(valid * sizeof(int) + 1);//matica s najkrasou cestou medzi prienceznami a drakom
 				for (int i = 0; i < valid + 1; i++) {
 					matica[i] = (int*)malloc(sizeof(int) + 1);
 				}
 
-				for (int i = 0; i < valid + 1; i++) {
+				for (int i = 0; i < valid + 1; i++) {//vypocita najkratsie cesty medzi princeznami
 					first = NULL;
 					arrayInit(array, n, m);
 					array[xova[i]][yova[i]].distance = 0;
@@ -336,7 +315,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 					}
 				}
 
-				//printf("\n  D  1  2  3\n"); //vypis matice
+				//vypis matice
 				//for (int i = 0; i < valid + 1; i++) {
 				//	if (i == 0)
 				//		printf("D ");
@@ -349,8 +328,8 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 				//}
 
 				//riesenie princezien a ich ciest
-				int* pomocna = (int*)malloc(sizeof(int) * (valid + 1));
-				int* najkratsi = (int*)malloc(sizeof(int) * (valid + 1));
+				int* pomocna = (int*)malloc(sizeof(int) * (valid + 1)); //array v ktorom sa cykliad aktualne hodnoty
+				int* najkratsi = (int*)malloc(sizeof(int) * (valid + 1)); //array na ulozenie poradia najkratsej cesty
 				int shortest = max, temp1 = 0;
 
 				int* random = (int*)malloc(sizeof(int) * (valid + 1));
@@ -359,7 +338,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 					random[i] = 0;
 				}
 
-				switch (valid) {
+				switch (valid) {//vygeneruje kombinacie cisel od 0 do poctu princezien bez opakovania a hlada najkratsiu cestu ktoru si potom ulozi do arrayu pomocna
 				case 5:
 					for (int i = 1; i < valid + 1; i++) {
 						if (random[i] == 1)
@@ -389,7 +368,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 										pomocna[4] = a;
 										pomocna[5] = b;
 
-										for (int z = 0; z < valid; z++) {
+										for (int z = 0; z < valid; z++) {//spravi sa dijkstra a zisti sa ci je nova ceseta kratsia
 											first = NULL;
 											arrayInit(array, n, m);
 											array[xova[pomocna[z]]][yova[pomocna[z]]].distance = 0;
@@ -398,7 +377,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 											temp1 += array[xova[pomocna[z + 1]]][yova[pomocna[z + 1]]].distance;
 											//printf("temp : %d\n", temp1);
 										}
-										if (temp1 < shortest) {
+										if (temp1 < shortest) {//ak je cesta kratsia
 											najkratsi[0] = 0;
 											najkratsi[1] = i;
 											najkratsi[2] = x;
@@ -408,7 +387,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 
 											shortest = temp1;
 										}
-										temp1 = 0;
+										temp1 = 0;//nastavi sa pocitadlo na 0
 
 										//printf("0 %d %d %d %d %d\n", i, x, y, a, b);
 										random[b] = 0;
@@ -560,7 +539,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 						random[i] = 0;
 					}
 					break;
-				case 1:
+				case 1: //ak ja len jedna najde sa iba nejkratsia cesta medzi nimi
 					najkratsi[0] = 0;
 					najkratsi[1] = 1;
 					//printf("0 1");
@@ -568,13 +547,13 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 				}
 
 
-				/*printf("najkratsia %d\n", shortest);
+				/*printf("najkratsia %d\n", shortest);//vypise poradie drakov a princezien pre najkratsiu cestu
 				for (int i = 0; i < valid; i++) {
 					printf("%d ", najkratsi[i]);
 				}
 				printf("\n\n");*/
 
-				for (int z = 0; z < valid; z++) { //vypis cesty pre princezne
+				for (int z = 0; z < valid; z++) { //zavola dijkstru s poradim pre najkratsiu cestu a prida cestu k princeznam do arrayu
 					first = NULL;
 					arrayInit(array, n, m);
 					array[xova[najkratsi[z]]][yova[najkratsi[z]]].distance = 0;
@@ -584,8 +563,8 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 					//printf("temp : %d\n", temp1);
 				}
 
-				*dlzka_cesty = counter + 1;
-				return finalarray;
+				*dlzka_cesty = counter + 1;//dlzka cesty
+				return finalarray;//vrati sa array so suradnicami
 			}
 		}
 	}
@@ -593,7 +572,7 @@ int* zachran_princezne(char** mapa, int n, int m, int t, int* dlzka_cesty) {
 		return NULL;
 }
 
-void test() { //nahodny test mapa 11X10
+void test(int on) { //nahodny test mapa 11X10
 	int dlzkax = 11, dlzkay = 10, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -609,19 +588,22 @@ void test() { //nahodny test mapa 11X10
 	mapa[8] = "CCCNNHHHHHC";
 	mapa[9] = "HHHPCCCPCCC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test1() {//nahodny test mapa 10X10
+void test1(int on) {//nahodny test mapa 20X10
 	int dlzkax = 20, dlzkay = 10, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -637,19 +619,22 @@ void test1() {//nahodny test mapa 10X10
 	mapa[8] = "CCCNNHHHHHCCCCCNHHHH";
 	mapa[9] = "HHHPCCCPCCCCHCCCNNNN";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test2() { //mapa 1X1
+void test2(int on) { //mapa 1X1
 	int dlzkax = 1, dlzkay = 1, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -657,19 +642,22 @@ void test2() { //mapa 1X1
 	mapa[0] = "C";
 
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test3() {//drak zavrety N
+void test3(int on) {//drak zavrety N
 	int dlzkax = 10, dlzkay = 10, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -685,19 +673,22 @@ void test3() {//drak zavrety N
 	mapa[8] = "CCCNNHHHHH";
 	mapa[9] = "HHHPCCCPCC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test4() {//jedna z princezien zavreta N
+void test4(int on) {//jedna z princezien zavreta N
 	int dlzkax = 10, dlzkay = 10, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -713,19 +704,22 @@ void test4() {//jedna z princezien zavreta N
 	mapa[8] = "CCCNNHHNHH";
 	mapa[9] = "HHHPCCNPNC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test5() {//malo casu na zabitie draka
+void test5(int on) {//malo casu na zabitie draka
 	int dlzkax = 10, dlzkay = 10, cas = 10, dlzka_cesty;
 	int* finalarray;
 
@@ -741,19 +735,22 @@ void test5() {//malo casu na zabitie draka
 	mapa[8] = "CCCNNHHHHH";
 	mapa[9] = "HHHPCCCPNC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test6() {//iny pocet drakov ako 1
+void test6(int on) {//iny pocet drakov ako 1
 	int dlzkax = 10, dlzkay = 10, cas = 20, dlzka_cesty;
 	int* finalarray;
 
@@ -769,19 +766,22 @@ void test6() {//iny pocet drakov ako 1
 	mapa[8] = "CCCNNHHHHH";
 	mapa[9] = "HHHPCCCPNC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test7() {//princezien iny pocet ako od 1 do 5
+void test7(int on) {//princezien iny pocet ako od 1 do 5
 	int dlzkax = 10, dlzkay = 10, cas = 10, dlzka_cesty;
 	int* finalarray;
 
@@ -797,50 +797,90 @@ void test7() {//princezien iny pocet ako od 1 do 5
 	mapa[8] = "CCCNNHHHHH";
 	mapa[9] = "HHHPCCCPNC";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test8() {//iba drak a princezna
+void test8(int on) {//iba drak a princezna
 	int dlzkax = 2, dlzkay = 1, cas = 20, dlzka_cesty;
 	int* finalarray;
 
 	char** mapa = (char**)malloc(dlzkay * sizeof(char*));
 	mapa[0] = "DP";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
 	free(mapa);
 }
 
-void test9() {//mapa ako rad
+void test9(int on) {//mapa ako rad
 	int dlzkax = 20, dlzkay = 1, cas = 20, dlzka_cesty;
 	int* finalarray;
 
 	char** mapa = (char**)malloc(dlzkay * sizeof(char*));
 	mapa[0] = "CPHCHHCCHDCCHCPHCCHN";
 
-	for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
-		for (int x = 0; x < dlzkax; x++) {
-			printf("%c", vzdialenost(mapa, x, y));
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
+
+	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
+	for (int i = 0; i < dlzka_cesty; i++)
+		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
+	free(mapa);
+}
+
+void test10(int on) {//v [0, 0] je N
+	int dlzkax = 10, dlzkay = 10, cas = 10, dlzka_cesty;
+	int* finalarray;
+
+	char** mapa = (char**)malloc(dlzkay * sizeof(char*));
+	mapa[0] = "NPHCNHCCHN";
+	mapa[1] = "NNCCCHHCCC";
+	mapa[2] = "DNCCNNHHHC";
+	mapa[3] = "CNCNNNNNNN";
+	mapa[4] = "CCCCCNHHHH";
+	mapa[5] = "CCHCCCNNNN";
+	mapa[6] = "NNNNNHCCCC";
+	mapa[7] = "CCCCCCCCCC";
+	mapa[8] = "CCCNNHHHHH";
+	mapa[9] = "HHHPCCCPNC";
+
+	if (on == 1) {
+		for (int y = 0; y < dlzkay; y++) { //vypis mapy na lahsie kopirovanie do vizualizeru
+			for (int x = 0; x < dlzkax; x++) {
+				printf("%c", vzdialenost(mapa, x, y));
+			}
+			printf("\n");
+		}
+	}
+
 	finalarray = zachran_princezne(mapa, dlzkax, dlzkay, cas, &dlzka_cesty);
 	for (int i = 0; i < dlzka_cesty; i++)
 		printf("%d %d\n", finalarray[2 * i], finalarray[2 * i + 1]);
@@ -848,35 +888,39 @@ void test9() {//mapa ako rad
 }
 
 int main() {
+	int on = 1; //premenna na zapnutie/vypnutie vypisu mapy na konzolu
 	printf("test:\n");
-	test();
+	test(on);
 	
 	printf("test1:\n");
-	test1();
+	test1(on);
 	
 	printf("test2:\n");
-	test2();
+	test2(on);
 	
 	printf("test3:\n");
-	test3();
+	test3(on);
 	
 	printf("test4:\n");
-	test4();
+	test4(on);
 	
 	printf("test5:\n");
-	test5();
+	test5(on);
 	
 	printf("test6:\n");
-	test6();
+	test6(on);
 	
 	printf("test7:\n");
-	test7();
+	test7(on);
 	
 	printf("test8:\n");
-	test8();
+	test8(on);
 	
 	printf("test9:\n");
-	test9();
+	test9(on);
+
+	printf("test10:\n");
+	test10(on);
 
 	return 0;
 }
