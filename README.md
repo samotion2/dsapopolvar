@@ -1,1 +1,1 @@
-# dsapopolvar
+# dsapopolvar s linked listom ako prioritnym radom
